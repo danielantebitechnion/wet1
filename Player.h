@@ -1,3 +1,6 @@
+#ifndef PLAYER_H
+#define PLAYER_H
+
 #include <iostream>
 
 class Player{
@@ -41,3 +44,4 @@ bool operator==(const Player&, const Player&);
 bool operator<(const Player&, const Player&);
 bool operator>(const Player&, const Player&);
 
+#endif /* PLAYER_H */
