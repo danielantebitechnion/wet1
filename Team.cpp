@@ -98,4 +98,3 @@ bool operator<(const Team& t1, const Team& t2){
 bool operator>(const Team& t1, const Team& t2){
     return t2<t1;
 }
-
