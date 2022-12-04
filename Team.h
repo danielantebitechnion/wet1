@@ -1,3 +1,6 @@
+#ifndef TEAM_H
+#define TEAM_H
+
 #include "Player.h"
 class Team{
   public:
@@ -34,3 +37,5 @@ bool operator==(const Team&, const Team&);
 bool operator!=(const Team&, const Team&);
 bool operator<(const Team&, const Team&);
 bool operator>(const Team&, const Team&);
+
+#endif /* TEAM_H */
