@@ -1,26 +1,6 @@
 
 
 #include "Team.h"
-/*
-  //D'tor
-  ~Team();
-  //Copy C'tor
-  Team(const& Team);
-  //Assignment operator
-  Team& operator=(const Team&);
-  //print
- 
-  private:
-  int teamId;
-  int teamPointsCounter;
-  int teamCardsCounter;
-  int teamGoalsCounter;
-  int numOfPlayersCounter;
-  int goalKeeperCounter;
-  //AVL<Player> teamPlayers;
-  bool isValidTeam; // 11 players and at least 1 goalkeeper
- 
-*/
 Team& Team::operator=(const Team& t){
     if( this == &t){
         return *this;
@@ -32,9 +12,10 @@ Team& Team::operator=(const Team& t){
     this->numOfPlayersCounter = t.numOfPlayersCounter;
     this->goalKeeperCounter = t.goalKeeperCounter;
     this->isValidTeam = t.isValidTeam;
-    //this->teamPlayers = t.teamPlayers;
+    this->teamPlayers = t.teamPlayers;
     return *this;
 }
+/*
 Team::Team(const Team& t){
      if(this != &t){
         this->teamId = t.teamId;
@@ -44,14 +25,16 @@ Team::Team(const Team& t){
         this->numOfPlayersCounter = t.numOfPlayersCounter;
         this->goalKeeperCounter = t.goalKeeperCounter;
         this->isValidTeam = t.isValidTeam;
-        //this->teamPlayers = t.teamPlayers;
+        this->teamPlayers = t.teamPlayers;
     }
 }
+*/
 
 
 Team::Team(int teamId,int points):
 teamId(teamId),
-teamPointsCounter(points)
+teamPointsCounter(points),
+teamPlayers(nullptr)
 {
     teamGoalsCounter=0;
     teamCardsCounter=0;
@@ -81,7 +64,9 @@ int Team::getNumOfGoalKeepers() const{
 void Team::setTeamId(int new_teamId){
     teamId = new_teamId;
 }
-
+void Team::setPoints(int points){
+    teamPointsCounter = points;
+}
 
 // operators
 bool operator!=(const Team& t1, const Team& t2){
