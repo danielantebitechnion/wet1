@@ -2,6 +2,7 @@
 #define TEAM_H
 
 #include "Player.h"
+#include "AVL.h"
 class Team{
   public:
   //C'tor
@@ -9,7 +10,7 @@ class Team{
   //D'tor
   ~Team() = default;
   //Copy C'tor
-  Team(const Team& ); // add
+  //Team(const Team& );
   //getters and setters
   int getTeamId() const;
   int getTeamPoints() const;
@@ -18,6 +19,7 @@ class Team{
   int getNumOfPlayers() const;
   int getNumOfGoalKeepers() const;
   void setTeamId(int new_teamId);
+  void setPoints(int points);
   //Assignment operator
   Team& operator=(const Team&);
   //print
@@ -29,7 +31,7 @@ class Team{
   int teamGoalsCounter;
   int numOfPlayersCounter;
   int goalKeeperCounter;
-  //AVL<Player*,Player*> teamPlayers;
+  AVL<Player,Player> teamPlayers;
   bool isValidTeam; // 11 players and at least 1 goalkeeper
  
 };
