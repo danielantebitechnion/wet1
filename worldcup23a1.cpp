@@ -1,13 +1,14 @@
 #include "worldcup23a1.h"
 
-world_cup_t::world_cup_t()
-{
-	// TODO: Your code goes here
-}
+world_cup_t::world_cup_t():all_players_top_scorer(nullptr),all_players_by_id(nullptr),teams_avl(nullptr),valid_teams(nullptr)
+{}
 
 world_cup_t::~world_cup_t()
 {
-	// TODO: Your code goes here
+    all_players_top_scorer.deleteAVL();
+    all_players_by_id.deleteAVL();
+    teams_avl.deleteAVL();
+    valid_teams.deleteAVL();
 }
 
 
@@ -16,25 +17,52 @@ StatusType world_cup_t::add_team(int teamId, int points)
 	if(teamId<=0 || points<0){
 		return StatusType::INVALID_INPUT;
 	}
-	Team* t(teams_avl.findNode(teamId));
-	if (t == NULL){
-		t = new Team(teamId,points);
-		Node<int,Team*> n(teamId,t);
-		teams_avl.insertNode(&n);
+	Node<int,Team>* t = teams_avl.findNode(teamId);
+	if (t == nullptr){
+		Team* new_team = new Team(teamId,points);
+		t->m_data.setTeamId(teamId);
+		t->m_data.setPoints(points);
+		t->m_key = teamId;
+		teams_avl.insertNode(t);
 	}
 	return StatusType::FAILURE;
 }
 
 StatusType world_cup_t::remove_team(int teamId)
 {
-	// TODO: Your code goes here
-	return StatusType::FAILURE;
+    if(teamId<=0){
+        return StatusType::INVALID_INPUT;
+    }
+    Node<int,Team>* t = teams_avl.findNode(teamId);
+	if (t == nullptr || t->m_data.getNumOfPlayers() != 0){
+	    return StatusType::FAILURE;
+	}
+	teams_avl.deleteNode(t);
+	return StatusType::SUCCESS;
 }
 
 StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed,
                                    int goals, int cards, bool goalKeeper)
 {
-	// TODO: Your code goes here
+    if(playerId<=0 || teamId<=0 || gamesPlayed<0 || goals<0 || cards<0){
+        return StatusType::INVALID_INPUT;
+    }
+    if(gamesPlayed == 0 && (goals>0 || cards>0)){
+        return StatusType::INVALID_INPUT;
+    }
+    Node<int,Player>* p = all_players_by_id.findNode(playerId);
+    if (p != nullptr){
+        return StatusType::FAILURE;
+    }
+    Node<int,Team>* t = teams_avl.findNode(teamId);
+    if (t == nullptr){
+        return StatusType::FAILURE;
+    }
+    Player* pl = new Player(playerId,teamId,gamesPlayed,goals,cards,goalKeeper);
+    Node<Player,Player> np(pl,pl);
+    all_players_by_id.insertNode(p);
+    all_players_top_scorer.insertNode(np);
+    // add player to teams_avl and if needed update valid_tems tree
 	return StatusType::SUCCESS;
 }
 
@@ -50,11 +78,11 @@ StatusType world_cup_t::update_player_stats(int playerId, int gamesPlayed,
 	if(playerId <= 0 || gamesPlayed<0 || scoredGoals<0 || cardsReceived<0){
 		return StatusType::INVALID_INPUT;
 	}
-	Player *p = all_players_by_id.findNode(playerId);
-	if(p !=NULL){
-		p->setCards(p->getCards()+cardsReceived);
-		p->setGamesPlayed(p->getGamesPlayed()+gamesPlayed);
-		p->setGoals(p->getGoals()+scoredGoals);
+	Node<int,Player>* p = all_players_by_id.findNode(playerId);
+	if(p !=nullptr){
+		p->m_data.setCards(p->m_data.getCards()+cardsReceived);
+		p->m_data.setGamesPlayed(p->m_data.getGamesPlayed()+gamesPlayed);
+		p->m_data.setGoals(p->m_data.getGoals()+scoredGoals);
 		return StatusType::SUCCESS;
 	}
 	return StatusType::FAILURE;
@@ -71,9 +99,9 @@ output_t<int> world_cup_t::get_num_played_games(int playerId)
 	if (playerId <= 0){
 		return StatusType::INVALID_INPUT;
 	}
-	Player *p = all_players_by_id.findNode(playerId);
-	if(p !=NULL){
-		return p->getGamesPlayed();
+	Node<int,Player> *p = all_players_by_id.findNode(playerId);
+	if(p !=nullptr){
+		return p->m_data.getGamesPlayed();
 	}
 	return StatusType::FAILURE;
 }
@@ -84,9 +112,9 @@ output_t<int> world_cup_t::get_team_points(int teamId)
 	if (teamId <= 0){
 		return StatusType::INVALID_INPUT;
 	}
-	Team *team = teams_avl.findNode(teamId);
-	if(team !=NULL){
-		return team->getTeamPoints();
+	Node<int,Team>* team = teams_avl.findNode(teamId);
+	if(team !=nullptr){
+		return team->m_data.getTeamPoints();
 	}
 	return StatusType::FAILURE;
 }
@@ -109,16 +137,15 @@ output_t<int> world_cup_t::get_all_players_count(int teamId)
 		return StatusType::INVALID_INPUT;
 	}
 	if (teamId < 0){
-	//Player root - getnumofplayers;
+	    Node<Player,Player>* p = all_players_top_scorer.getRoot();
+	    return p->m_data.getTotalPlayers();
 	}
-	if (teamId > 0){
-		Team *team = teams_avl.findNode(teamId);
-		if(team !=NULL){
-			return team->getNumOfPlayers();
-		}
-		return StatusType::FAILURE;
+	//if (teamId > 0){
+	Node<int,Team>* n = teams_avl.findNode(teamId);
+	if(n !=nullptr){
+		return n->m_data.getNumOfPlayers();
 	}
-
+	return StatusType::FAILURE;
 }
 
 StatusType world_cup_t::get_all_players(int teamId, int *const output)
