@@ -1,6 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+const int NUM_OF_AVL_TREES = 4;
+
 #include <iostream>
 
 class Player{
@@ -19,6 +21,7 @@ class Player{
     int getCards() const;
     bool getIsGoalKeeper() const;
     int getTotalPlayers() const;
+    int getTeamGamesPlayedOnArrival () const;
     // setters
     void setPlayerId(int newPlayerId);
     void setTeamId(int newTeamId);
@@ -26,7 +29,9 @@ class Player{
     void setGoals(int newGoals);
     void setCards(int newCards);
     void setIsGoalKeeper(bool isGoalKeeper);
+    void setTeamGamesPlayedOnArrival (int numOfTeamGamesPlayedOnArrival);
     Player& operator=(const Player&);
+
     private:
     int playerId;
     int teamId;
@@ -35,6 +40,7 @@ class Player{
     int cards;
     bool goalKeeper;
     static int playersCounter;
+    int teamGamesPlayedOnArrival;
 
 };
 bool operator!=(const Player&, const Player&);

@@ -1,6 +1,27 @@
-
-
+#include "AVL.h"
 #include "Team.h"
+#include "Player.h"
+
+/*
+  //D'tor
+  ~Team();
+  //Copy C'tor
+  Team(const& Team);
+  //Assignment operator
+  Team& operator=(const Team&);
+  //print
+ 
+  private:
+  int teamId;
+  int teamPointsCounter;
+  int teamCardsCounter;
+  int teamGoalsCounter;
+  int numOfPlayersCounter;
+  int goalKeeperCounter;
+  //AVL<Player> teamPlayers;
+  bool isValidTeam; // 11 players and at least 1 goalkeeper
+ 
+*/
 Team& Team::operator=(const Team& t){
     if( this == &t){
         return *this;
@@ -15,8 +36,7 @@ Team& Team::operator=(const Team& t){
     this->teamPlayers = t.teamPlayers;
     return *this;
 }
-/*
-Team::Team(const Team& t){
+Team::Team(const Team& t) {
      if(this != &t){
         this->teamId = t.teamId;
         this->teamPointsCounter = t.teamPointsCounter;
@@ -28,19 +48,21 @@ Team::Team(const Team& t){
         this->teamPlayers = t.teamPlayers;
     }
 }
-*/
 
 
-Team::Team(int teamId,int points):
+Team::Team(int teamId,int points)
+    :
 teamId(teamId),
 teamPointsCounter(points),
-teamPlayers(nullptr)
-{
-    teamGoalsCounter=0;
-    teamCardsCounter=0;
-    goalKeeperCounter=0;
-    isValidTeam = false;
-}
+teamCardsCounter(0),
+teamGoalsCounter(0),
+numOfPlayersCounter(0),
+goalKeeperCounter(0),
+teamPlayers(nullptr),
+isValidTeam(false),
+teamGamesPlayed(0),
+team_top_scorer(0)
+{}
 
 //getters and setters
 int Team::getTeamId() const{
@@ -61,11 +83,47 @@ int Team::getNumOfPlayers() const{
 int Team::getNumOfGoalKeepers() const{
     return goalKeeperCounter;
 }
+bool Team::getValidity() const {
+    return isValidTeam;
+}
+AVL<Player,Player>* Team::getTeamPlayers() {
+    return &teamPlayers;
+}
+int Team::getTeamGamesPlayed () const {
+    return teamGamesPlayed;
+}
+int Team::getTeamTopScorer() const{
+    std::cout << "check:" << team_top_scorer << std::endl;
+    return team_top_scorer;
+}
+
+void Team::setTeamTopScorer(int id){
+    std::cout << "id = " << id << std::endl;
+    team_top_scorer = id;
+}
 void Team::setTeamId(int new_teamId){
     teamId = new_teamId;
 }
-void Team::setPoints(int points){
-    teamPointsCounter = points;
+void Team::addCardsNum(int num){
+    teamCardsCounter += num;
+}
+void Team::addGoalsNum(int num){
+    teamGoalsCounter += num;
+}
+void Team::addPlayersNum(int num){
+    numOfPlayersCounter += num;
+}
+void Team::addGoalKeepersNum(int num){
+    goalKeeperCounter += num;
+}
+void Team::validitySetter(bool validity){
+    isValidTeam = validity;
+}
+void Team::addToPoints (int howMuchToAdd) {
+    teamPointsCounter += howMuchToAdd;
+}
+void Team::addToTeamGamesPlayed (int howMuchToAdd) {
+    teamGamesPlayed += howMuchToAdd;
 }
 
 // operators

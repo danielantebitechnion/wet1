@@ -2,15 +2,18 @@
 #include <iostream>
 int Player::playersCounter = 0;
 
-Player::Player(int playerId,int teamId,int gamesPlayed,int goals,int cards,bool goalKeeper):
-playerId(playerId),
-teamId(teamId),
-gamesPlayed(gamesPlayed),
-goals(goals),
-cards(cards),
-goalKeeper(goalKeeper){
-    playersCounter++;
-}
+Player::Player(int playerId,int teamId,int gamesPlayed,int goals,int cards,bool goalKeeper)
+    :
+    playerId(playerId),
+    teamId(teamId),
+    gamesPlayed(gamesPlayed),
+    goals(goals),
+    cards(cards),
+    goalKeeper(goalKeeper),
+    teamGamesPlayedOnArrival(0)
+    {
+        playersCounter++;
+    }
 
 Player::~Player(){
     playersCounter--;
@@ -39,6 +42,9 @@ bool Player::getIsGoalKeeper() const{
 int Player::getTotalPlayers() const{
     return playersCounter;
 }
+int Player::getTeamGamesPlayedOnArrival () const {
+    return teamGamesPlayedOnArrival;
+}
 
 // setters
 void Player::setPlayerId(int newPlayerId){
@@ -58,6 +64,9 @@ void Player::setCards(int newCards){
 }
 void Player::setIsGoalKeeper(bool isGoalKeeper){
     goalKeeper = isGoalKeeper;
+}
+void Player::setTeamGamesPlayedOnArrival (int numOfTeamGamesPlayedOnArrival){
+    teamGamesPlayedOnArrival = numOfTeamGamesPlayedOnArrival;
 }
 
 // operators
@@ -104,21 +113,32 @@ Player::Player(const Player& p){
         this->teamId = p.teamId;
         this->gamesPlayed = p.gamesPlayed;
         this->goals = p.goals;
-        this->cards = cards;
-        this->goalKeeper = goalKeeper;
+        this->cards = p.cards;
+        this->goalKeeper = p.goalKeeper;
+        this->teamGamesPlayedOnArrival = p.teamGamesPlayedOnArrival;
         playersCounter--;
     }
 }
 Player& Player::operator=(const Player& p){
-    if( this == &p){
+    if(this == &p){
         return *this;
     }
     this->playerId = p.playerId;
     this->teamId = p.teamId;
     this->gamesPlayed = p.gamesPlayed;
     this->goals = p.goals;
-    this->cards = cards;
-    this->goalKeeper = goalKeeper;
+    this->cards = p.cards;
+    this->goalKeeper = p.goalKeeper;
+    this->teamGamesPlayedOnArrival = p.teamGamesPlayedOnArrival;
     playersCounter--;
     return *this;
 }
+
+// int main() {
+//     Player player1(1,1,1,1,1,true);
+//     Player player2(2,2,2,2,2,false);
+//     Player player3(3,3,3,3,3,true);
+//     Player player4(4,4,4,4,4,false);
+//     std::cout << "It works." << std::endl;
+//     return 0;
+// }
