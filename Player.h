@@ -39,7 +39,6 @@ class Player{
     int goals;
     int cards;
     bool goalKeeper;
-    static int playersCounter;
     int teamGamesPlayedOnArrival;
 
 };

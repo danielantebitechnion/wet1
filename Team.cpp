@@ -32,8 +32,10 @@ Team& Team::operator=(const Team& t){
     this->teamGoalsCounter = t.teamGoalsCounter;
     this->numOfPlayersCounter = t.numOfPlayersCounter;
     this->goalKeeperCounter = t.goalKeeperCounter;
-    this->isValidTeam = t.isValidTeam;
     this->teamPlayers = t.teamPlayers;
+    this->isValidTeam = t.isValidTeam;
+    this->teamGamesPlayed = t.teamGamesPlayed;
+    this->team_top_scorer = t.team_top_scorer;
     return *this;
 }
 Team::Team(const Team& t) {
@@ -44,8 +46,10 @@ Team::Team(const Team& t) {
         this->teamGoalsCounter = t.teamGoalsCounter;
         this->numOfPlayersCounter = t.numOfPlayersCounter;
         this->goalKeeperCounter = t.goalKeeperCounter;
-        this->isValidTeam = t.isValidTeam;
         this->teamPlayers = t.teamPlayers;
+        this->isValidTeam = t.isValidTeam;
+        this->teamGamesPlayed = t.teamGamesPlayed;
+        this->team_top_scorer = t.team_top_scorer;
     }
 }
 
@@ -86,19 +90,17 @@ int Team::getNumOfGoalKeepers() const{
 bool Team::getValidity() const {
     return isValidTeam;
 }
-AVL<Player,Player>* Team::getTeamPlayers() {
+AVL<Player*,Player*>* Team::getTeamPlayers() {
     return &teamPlayers;
 }
 int Team::getTeamGamesPlayed () const {
     return teamGamesPlayed;
 }
 int Team::getTeamTopScorer() const{
-    std::cout << "check:" << team_top_scorer << std::endl;
     return team_top_scorer;
 }
 
 void Team::setTeamTopScorer(int id){
-    std::cout << "id = " << id << std::endl;
     team_top_scorer = id;
 }
 void Team::setTeamId(int new_teamId){

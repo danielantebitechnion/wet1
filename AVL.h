@@ -112,16 +112,16 @@ class Node {
         }
 
         // Delete a node
-        Node<K,D> *deleteNodeNode(Node<K,D> *root, Node<K,D> *node) {
+        Node<K,D> *deleteNodeNode(Node<K,D> *root, K key) {
             // Find node
             if (root == nullptr) {
                 return root;
             }
-            if (node->m_key < root->m_key) {
-                root->m_left = deleteNodeNode(root->m_left, node);
+            if (key < root->m_key) {
+                root->m_left = deleteNodeNode(root->m_left, key);
             }
-            else if (node->m_key > root->m_key) {
-                root->m_right = deleteNodeNode(root->m_right, node);
+            else if (key > root->m_key) {
+                root->m_right = deleteNodeNode(root->m_right, key);
             }
             else { // delete node
                 if ((root->m_left == nullptr) ||
@@ -145,7 +145,7 @@ class Node {
                     leftmostNode(root->m_right);
                     root->m_key = temp->m_key;
                     root->m_data = temp->m_data;
-                    root->m_right = deleteNodeNode(root->m_right, temp);
+                    root->m_right = deleteNodeNode(root->m_right, temp->m_key);
                 }
             }
 
@@ -250,8 +250,8 @@ class AVL {
         }
 
         // Call node deletion
-        void deleteNode(Node<K,D> *node) {
-            m_root = m_root->deleteNodeNode(m_root, node);
+        void deleteNode(K key) {
+            m_root = m_root->deleteNodeNode(m_root, key);
         }
 
         // Call function of tree's printing
@@ -276,8 +276,8 @@ class AVL {
         }
 
         // Node with minimum value
-        Node<K,D> *smallestNode(Node<K,D> *node) {
-            Node<K,D> *current = node;
+        Node<K,D> *smallestNode() {
+            Node<K,D> *current = m_root;
             while (current->m_left != nullptr) {
                 current = current->m_left;
             }
@@ -285,14 +285,13 @@ class AVL {
         }
 
         // Node with maximum value
-        Node<K,D> *biggestNode(Node<K,D> *node) {
-            Node<K,D> *current = node;
+        Node<K,D> *biggestNode() {
+            Node<K,D> *current = m_root;
             while (current->m_right != nullptr) {
                 current = current->m_left;
             }
             return current;
         }
-
 
     private:
         Node<K,D> *m_root;

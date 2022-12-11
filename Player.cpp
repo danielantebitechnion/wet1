@@ -1,6 +1,5 @@
 #include "Player.h"
 #include <iostream>
-int Player::playersCounter = 0;
 
 Player::Player(int playerId,int teamId,int gamesPlayed,int goals,int cards,bool goalKeeper)
     :
@@ -11,13 +10,9 @@ Player::Player(int playerId,int teamId,int gamesPlayed,int goals,int cards,bool 
     cards(cards),
     goalKeeper(goalKeeper),
     teamGamesPlayedOnArrival(0)
-    {
-        playersCounter++;
-    }
+    {}
 
-Player::~Player(){
-    playersCounter--;
-   
+Player::~Player(){  
 }
 
 // getters
@@ -38,9 +33,6 @@ int Player::getCards() const{
 }
 bool Player::getIsGoalKeeper() const{
     return goalKeeper;
-}
-int Player::getTotalPlayers() const{
-    return playersCounter;
 }
 int Player::getTeamGamesPlayedOnArrival () const {
     return teamGamesPlayedOnArrival;
@@ -116,7 +108,6 @@ Player::Player(const Player& p){
         this->cards = p.cards;
         this->goalKeeper = p.goalKeeper;
         this->teamGamesPlayedOnArrival = p.teamGamesPlayedOnArrival;
-        playersCounter--;
     }
 }
 Player& Player::operator=(const Player& p){
@@ -130,7 +121,6 @@ Player& Player::operator=(const Player& p){
     this->cards = p.cards;
     this->goalKeeper = p.goalKeeper;
     this->teamGamesPlayedOnArrival = p.teamGamesPlayedOnArrival;
-    playersCounter--;
     return *this;
 }
 
