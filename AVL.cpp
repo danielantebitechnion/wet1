@@ -32,7 +32,7 @@ int main() {
     cout << endl;
 
     cout << "Deletion's verification:" << endl;
-    avl11.deleteNode(&node12);
+    avl11.deleteNode(2);
     avl11.printTreeAVL();
     cout << endl;
 

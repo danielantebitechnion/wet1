@@ -22,7 +22,7 @@ class Team{
   bool getValidity() const;
   int getTeamGamesPlayed () const;
   int getTeamTopScorer() const;
-  AVL<Player*,Player*>* getTeamPlayers();
+  AVL<Player,Player>* getTeamPlayers();
   void setTeamId(int new_teamId);
   void addCardsNum(int num);
   void addGoalsNum(int num);
@@ -43,7 +43,7 @@ class Team{
   int teamGoalsCounter;
   int numOfPlayersCounter;
   int goalKeeperCounter;
-  AVL<Player*,Player*> teamPlayers;
+  AVL<Player,Player> teamPlayers;
   bool isValidTeam; // 11 players and at least 1 goalkeeper
   int teamGamesPlayed;
   int team_top_scorer;

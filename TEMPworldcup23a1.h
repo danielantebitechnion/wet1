@@ -46,14 +46,31 @@ class world_cup_t {
 	
 	    output_t<int> knockout_winner(int minTeamId, int maxTeamId);
 
+        // aux
+        AVL<int,Team> getWorldTeamsAVL() {
+            return m_teams;
+        }
+        AVL<int,Player> getWorldPlayersId() {
+            return m_players_id;
+        }
+        AVL<Player,Player> getWorldPlayersScore() {
+            return m_players_score;
+        }
+        AVL<int,Team> getWorldValidTeams() {
+            return m_valid_teams;
+        }
+        AVL<int,AddressKeeper> getAddresses() {
+            return m_addresses;
+        }
 
     private:
-        AVL<int,Team> m_teams; // tree of all the teams and valid teams location
-        AVL<Player,Player*> m_players_score; // players score tree
-        AVL<int,AddressKeeper> m_players_id; // pointer to player id team
-        AVL<int,int> m_valid_teams; // tree of all the valid teams with their points
+        AVL<int,Team> m_teams;
+        AVL<int,Player> m_players_id;
+        AVL<Player,Player> m_players_score;
+        AVL<int,Team> m_valid_teams;
+        AVL<int,AddressKeeper> m_addresses;
         int m_top_scorer;
-        int m_all_players_count;
+        int m_num_of_players;
 };
 
 #endif // TEMP

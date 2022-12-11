@@ -10,11 +10,12 @@ using std::endl;
 world_cup_t::world_cup_t()
     :
     m_teams(nullptr),
-    m_players_score(nullptr),
     m_players_id(nullptr),
+    m_players_score(nullptr),
     m_valid_teams(nullptr),
+    m_addresses(nullptr),
     m_top_scorer(0),
-    m_all_players_count(0)
+    m_num_of_players(0)
     {}
 
 world_cup_t::~world_cup_t() {
@@ -22,6 +23,7 @@ world_cup_t::~world_cup_t() {
     m_players_id.deleteAVL();
     m_players_score.deleteAVL();
     m_valid_teams.deleteAVL();
+    m_addresses.deleteAVL();
 }
 
 StatusType world_cup_t::add_team(int teamId, int points) {
@@ -66,25 +68,32 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed, in
         return StatusType::FAILURE;
     }
     try {
-        m_all_players_count++;
-        // add players to trees
-        // create player
-        Player* player = new Player(playerId, teamId, gamesPlayed, goals, cards, goalKeeper);
-        // indicator how many games teams played before the player joined
+        m_num_of_players++;
+        bool validityAtBeginning = m_teams.findNode(teamId)->m_data.getValidity();
         int PlaysOnArrival = m_teams.findNode(teamId)->m_data.getTeamGamesPlayed();
-        player->setTeamGamesPlayedOnArrival(PlaysOnArrival);
-        // add player to team tree
-        Node<Player*, Player*>* PlayerNode = new Node<Player*, Player*>(player, player);
-        m_teams.findNode(teamId)->m_data.getTeamPlayers()->insertNode(PlayerNode);
-        // add player to <id,adresses> tree
-        Node<int, Player>* IDNode = new Node<int, Player>(playerId,*player);
+        Player* player0 = new Player(playerId, teamId, gamesPlayed, goals, cards, goalKeeper);
+        Player* player1 = new Player(playerId, teamId, gamesPlayed, goals, cards, goalKeeper);
+        Player* player2 = new Player(playerId, teamId, gamesPlayed, goals, cards, goalKeeper);
+        player0->setTeamGamesPlayedOnArrival(PlaysOnArrival);
+        player1->setTeamGamesPlayedOnArrival(PlaysOnArrival);
+        player2->setTeamGamesPlayedOnArrival(PlaysOnArrival);
+        Node<int, Player>* IDNode = new Node<int, Player>(playerId,*player0);
+        Node<Player, Player>* playerPlayerNode1 = new Node<Player, Player>(*player1, *player1);
+        Node<Player, Player>* playerPlayerNode2 = new Node<Player, Player>(*player2, *player2);
+        // add players to trees
         m_players_id.insertNode(IDNode);
-        m_players_score.insertNode(playerPlayerNode);
-        m_teams.findNode(teamId)->m_data.getTeamPlayers()->insertNode(playerPlayerNode);
+        m_players_score.insertNode(playerPlayerNode1);
+        m_teams.findNode(teamId)->m_data.getTeamPlayers()->insertNode(playerPlayerNode2);
         // create AddressesKeeper and assignement
         AddressKeeper* addresses = new AddressKeeper;
-
+        // player by id tree
+        addresses->m_players_id_avl = &m_players_id;
+        addresses->m_players_id_address = IDNode;
+        // player by score tree
+        addresses->m_players_score_avl = &m_players_score;
+        addresses->m_players_score_address = playerPlayerNode1;
         // teams tree
+        addresses->m_teams_avl = &m_teams;
         addresses->m_teams_address = m_teams.findNode(teamId);
         // update teams stats
         m_teams.findNode(teamId)->m_data.addCardsNum(cards);
@@ -100,10 +109,13 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed, in
         // check team validity
         bool validityAfterAddition = m_teams.findNode(teamId)->m_data.getValidity();
         // if team was valid before
-        /*
         if (validityAtBeginning == true && validityAfterAddition == true) {
             int topScorerID = m_teams.findNode(teamId)->m_data.getTeamTopScorer();
-            m_valid_teams.findNode(teamId)->m_data.getTeamPlayers()->insertNode(playerPlayerNode);
+            Player* player3 = new Player(playerId, teamId, gamesPlayed, goals, cards, goalKeeper);
+            player3->setTeamGamesPlayedOnArrival(PlaysOnArrival);
+            Node<Player, Player>* playerPlayerNode3 = new Node<Player, Player>(*player3, *player3);
+            m_valid_teams.findNode(teamId)->m_data.getTeamPlayers()->insertNode(playerPlayerNode3);
+            addresses->m_valid_teams_avl = &m_valid_teams;
             addresses->m_valid_teams_address = m_valid_teams.findNode(teamId);;
             m_valid_teams.findNode(teamId)->m_data.addCardsNum(cards);
             m_valid_teams.findNode(teamId)->m_data.addGoalsNum(goals);
@@ -114,17 +126,17 @@ StatusType world_cup_t::add_player(int playerId, int teamId, int gamesPlayed, in
             m_valid_teams.findNode(teamId)->m_data.setTeamTopScorer(topScorerID);
             // team change from invalid to valid
         } else if (validityAtBeginning == false && validityAfterAddition == true) {
-            m_valid_teams.insertNode(addresses->m_teams_address);
-
+            Node<int, Team>* intTeamNode = new Node<int, Team>(teamId, m_teams.findNode(teamId)->m_data);
+            m_valid_teams.insertNode(intTeamNode);
+            addresses->m_valid_teams_avl = &m_valid_teams;
             addresses->m_valid_teams_address = m_valid_teams.findNode(teamId);
         }
-        */
         Node<int, AddressKeeper>* addressesNode = new Node<int, AddressKeeper>(playerId, *addresses);
         m_addresses.insertNode(addressesNode);
         // update turnament top scorer
-        m_top_scorer = m_players_score.biggestNode()->m_data->getPlayerId();
+        m_top_scorer = m_players_score.findNode(*player0)->m_data.getPlayerId();
         // update Team top scorer
-        m_teams.findNode(teamId)->m_data.setTeamTopScorer(m_teams.findNode(teamId)->m_data.getTeamPlayers()->biggestNode()->m_data->getPlayerId());
+        m_teams.findNode(teamId)->m_data.setTeamTopScorer(m_teams.findNode(teamId)->m_data.getTeamPlayers()->biggestNode()->m_data.getPlayerId());
     } catch(std::bad_alloc &e) {
         return StatusType::ALLOCATION_ERROR;
     }
@@ -139,63 +151,62 @@ StatusType world_cup_t::remove_player(int playerId) {
         return StatusType::FAILURE;
     }
     try {
-        m_all_players_count--;
-        Player p = m_players_id.findNode(playerId)->m_data;
+        m_num_of_players--;
+        Player player = m_players_id.findNode(playerId)->m_data;
+        int teamId = m_addresses.findNode(playerId)->m_data.m_players_id_address->m_data.getTeamId();
+        int cards = m_addresses.findNode(playerId)->m_data.m_players_id_address->m_data.getCards();
+        int goals = m_addresses.findNode(playerId)->m_data.m_players_id_address->m_data.getGoals();
+        bool goalKeeper = m_addresses.findNode(playerId)->m_data.m_players_id_address->m_data.getIsGoalKeeper();
         bool validityAtBeginning = m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.getValidity();
         // delete from player by id tree
         m_players_id.deleteNode(playerId);
         // delete from player by score tree
-        m_players_score.deleteNode(p);
+        m_players_score.deleteNode(player);
         // delete from teams tree
-        m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.getTeamPlayers()->deleteNode(p);
+        m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.getTeamPlayers()->deleteNode(player);
         // update teams stats
-        m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.addCardsNum(-p.getCards());
-        m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.addGoalsNum(-p.getGoals());
+        m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.addCardsNum(-cards);
+        m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.addGoalsNum(-goals);
         m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.addPlayersNum(-1);
-        if (p.getIsGoalKeeper() == true) {
+        if (goalKeeper == true) {
             m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.addGoalKeepersNum(-1);
         }
         // check if team is still valid
         if (m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.getNumOfPlayers() < VALID_PLAYERS_NUM
         && m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.getNumOfGoalKeepers() < 1) {
-            m_teams.findNode(p.getTeamId())->m_data.validitySetter(false);
+            m_teams.findNode(teamId)->m_data.validitySetter(false);
         }
-        /*
         bool validityAfterDeletion = m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.getValidity();
         if (validityAtBeginning == true && validityAfterDeletion == true) {
             // delete from valid teams tree
-            m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.getTeamPlayers()->deleteNode(p);
+            m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.getTeamPlayers()->deleteNode(player);
             // update valid teams stats
-            m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.addCardsNum(-p.getCards());
-            m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.addGoalsNum(-p.getGoals());
+            m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.addCardsNum(-cards);
+            m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.addGoalsNum(-goals);
             m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.addPlayersNum(-1);
-            if (p.getIsGoalKeeper() == true) {
+            if (goalKeeper == true) {
                 m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.addGoalKeepersNum(-1);
             }
         } else if (validityAtBeginning == true && validityAfterDeletion == false) {
             m_addresses.findNode(playerId)->m_data.m_valid_teams_address->m_data.getTeamPlayers()->deleteAVL();
-            //m_addresses.findNode(playerId)->m_data.m_valid_teams_avl->deleteNode(p.getTeamId()); log k complex
-        }
-        // delete from adresses tree
-        m_addresses.deleteNode(playerId);
-        */
-        // update top scorrer if needed:
-        // update top scorer of the turnament:
-        if(m_top_scorer == playerId){ //turnament top scorer was removed
-            if(m_players_id.getRoot() != nullptr) // still have players in turnament
-                m_top_scorer = m_players_score.biggestNode()->m_data.getPlayerId(); // next Player who is top scorer
-            else{ //no more players in turnament
-                m_top_scorer = 0;
-            }
-        }
-        if(m_addresses.findNode(p.getTeamId())->m_data.m_teams_address->m_data.getTeamTopScorer() == playerId){ // team top scorer was removed
-            if(m_addresses.findNode(p.getTeamId())->m_data.m_teams_address->m_data.getNumOfPlayers() > 0){ // there are players in team - replace top scorer to the next best player
-                int new_top_scorer_id = m_addresses.findNode(p.getTeamId())->m_data.m_teams_address->m_data.getTeamPlayers()->biggestNode()->m_data.getPlayerId(); // new top scorer id
-                m_addresses.findNode(p.getTeamId())->m_data.m_teams_address->m_data.setTeamTopScorer(new_top_scorer_id);
-            }
+            m_addresses.findNode(playerId)->m_data.m_valid_teams_avl->deleteNode(teamId);
         }
     } catch (std::bad_alloc &e) {
         return StatusType::ALLOCATION_ERROR;
+    }
+    // update turnament top scorer
+    if(m_num_of_players != 0){
+        m_top_scorer = m_players_score.biggestNode()->m_data.getPlayerId();
+    }
+    else{
+        m_top_scorer = 0;
+    }
+    // update team top scorer
+    if(m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.getNumOfPlayers() != 0){
+        m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.setTeamTopScorer(m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.getTeamPlayers()->biggestNode()->m_data.getPlayerId());
+    }
+    else{
+        m_addresses.findNode(playerId)->m_data.m_teams_address->m_data.setTeamTopScorer(0);
     }
     return StatusType::SUCCESS;
 }
@@ -316,6 +327,7 @@ StatusType world_cup_t::unite_teams(int teamId1, int teamId2, int newTeamId)
             return StatusType::FAILURE;
         }
     }
+    
 
 }
 
@@ -347,7 +359,7 @@ output_t<int> world_cup_t::get_all_players_count(int teamId)
         return StatusType::INVALID_INPUT;
     }
     if(teamId < 0 ){
-        return m_all_players_count;
+        return m_num_of_players;
     }
     if (m_teams.findNode(teamId) == nullptr){
         return StatusType::FAILURE;
@@ -374,7 +386,6 @@ output_t<int> world_cup_t::knockout_winner(int minTeamId, int maxTeamId)
 	// TODO: Your code goes here
 	return 2;
 }
-
 
 int main()
 {
@@ -513,7 +524,7 @@ int main()
         cout << "isValidTeam = " << world.getWorldTeamsAVL().getRoot()->m_data.getValidity() << endl;
     }
     cout << endl;
-    /*
+
     // update stats
     cout << "update stats:" << endl;
     cout << "current stats of (10) are:" << endl;
@@ -531,10 +542,9 @@ int main()
         cout << "Goals: " << newGoals << endl;
         int newCards = world.getAddresses().findNode(10)->m_data.m_players_id_address->m_data.getCards();
         cout << "Cards: " << newCards << endl;
-
     }
     cout << endl;
-    */
+
     // // play match
 
 

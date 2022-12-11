@@ -90,7 +90,7 @@ int Team::getNumOfGoalKeepers() const{
 bool Team::getValidity() const {
     return isValidTeam;
 }
-AVL<Player*,Player*>* Team::getTeamPlayers() {
+AVL<Player,Player>* Team::getTeamPlayers() {
     return &teamPlayers;
 }
 int Team::getTeamGamesPlayed () const {
